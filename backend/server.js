@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const { testConnection } = require('./config/database');
+const { testConnection, initializeDatabase } = require('./config/database-pg');
 
 // Load environment variables
 dotenv.config();
@@ -64,6 +64,9 @@ const PORT = process.env.PORT || 10000;
 async function startServer() {
   // Test database connection
   await testConnection();
+  
+  // Initialize database schema
+  await initializeDatabase();
   
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n🚀 Server running on port ${PORT}`);
