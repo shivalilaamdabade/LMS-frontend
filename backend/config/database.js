@@ -1,29 +1,20 @@
-const { Pool } = require('pg');
+const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-// Parse connection string or use individual env vars
-let pool;
-if (process.env.DATABASE_URL) {
-  // Use connection string (Neon)
-  pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: {
-      rejectUnauthorized: false
-    }
-  });
-} else {
-  // Use individual env vars (backward compatibility)
-  pool = new Pool({
-    host: process.env.DB_HOST,
-    port: parseInt(process.env.DB_PORT),
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    ssl: {
-      rejectUnauthorized: false
-    }
-  });
-}
+// Create MySQL connection pool
+const pool = mysql.createPool({
+  host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT),
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  ssl: {
+    rejectUnauthorized: false
+  },
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
 
 // Test connection
 async function testConnection() {
