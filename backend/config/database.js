@@ -1,6 +1,15 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
+console.log('=== DATABASE CONFIG DEBUG ===');
+console.log('DB_HOST:', process.env.DB_HOST ? 'SET' : 'MISSING');
+console.log('DB_PORT:', process.env.DB_PORT ? 'SET' : 'MISSING');
+console.log('DB_USER:', process.env.DB_USER ? 'SET' : 'MISSING');
+console.log('DB_PASSWORD:', process.env.DB_PASSWORD ? 'SET' : 'MISSING');
+console.log('DB_NAME:', process.env.DB_NAME ? 'SET' : 'MISSING');
+console.log('SSL Config:', 'false');
+console.log('==============================');
+
 // Create MySQL connection pool
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -8,7 +17,7 @@ const pool = mysql.createPool({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  ssl: {}
+  ssl: false, // Disabled for Aiven compatibility
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -23,6 +32,8 @@ async function testConnection() {
     return true;
   } catch (error) {
     console.error('✗ Database connection failed:', error.message);
+    console.error('Error code:', error.code);
+    console.error('Error errno:', error.errno);
     return false;
   }
 }
@@ -131,7 +142,4 @@ async function initializeDatabase() {
 }
 
 module.exports = { pool, testConnection, initializeDatabase };
-
-
-
 
