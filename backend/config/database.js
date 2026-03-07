@@ -8,7 +8,7 @@ const pool = mysql.createPool({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  ssl: false, // Force rebuild for Aiven
+  ssl: { rejectUnauthorized: true }
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -131,4 +131,5 @@ async function initializeDatabase() {
 }
 
 module.exports = { pool, testConnection, initializeDatabase };
+
 
