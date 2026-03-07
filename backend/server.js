@@ -35,6 +35,29 @@ app.get('/', (req, res) => {
   });
 });
 
+// API info route
+app.get('/api', (req, res) => {
+  res.json({
+    success: true,
+    message: 'LMS API v1',
+    endpoints: {
+      auth: '/api/auth',
+      login: 'POST /api/auth/login',
+      register: 'POST /api/auth/register',
+      courses: '/api/courses'
+    }
+  });
+});
+
+// API Routes
+app.use(, (req, res) => {
+  res.json({
+    success: true,
+    message: 'LMS API is running',
+    version: '1.0.0'
+  });
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
@@ -78,3 +101,4 @@ async function startServer() {
 startServer();
 
 module.exports = app;
+
