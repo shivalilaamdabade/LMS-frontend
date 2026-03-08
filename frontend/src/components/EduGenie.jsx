@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import './EduGenie.css';
 
-// Hugging Face API Configuration
-const HF_API_TOKEN = import.meta.env.VITE_HUGGINGFACE_TOKEN;
-const HF_API_URL = 'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2';
+// API Configuration - Use backend proxy to avoid CORS
+const HF_API_URL = '/api/ai/chat';
 
 const EduGenie = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -57,26 +56,15 @@ ${conversationHistory}
 User: ${userMessage}
 EduGenie: [/INST]`;
 
-      console.log('Sending request to Hugging Face API...');
-      console.log('Token exists:', !!HF_API_TOKEN);
-      console.log('API URL:', HF_API_URL);
+      console.log('Sending request to backend AI proxy...');
 
       const response = await fetch(HF_API_URL, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${HF_API_TOKEN}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          inputs: prompt,
-          parameters: {
-            max_new_tokens: 300,
-            temperature: 0.8,
-            top_p: 0.95,
-            return_full_text: false,
-            do_sample: true,
-            repetition_penalty: 1.2
-          }
+          prompt: prompt
         })
       });
 

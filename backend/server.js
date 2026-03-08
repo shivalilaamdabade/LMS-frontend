@@ -89,6 +89,57 @@ app.use('/api/courses', courseRoutes);
 app.use('/api/enrollments', enrollmentRoutes);
 app.use('/api/progress', progressRoutes);
 
+// Hugging Face AI Proxy Route (to avoid CORS issues)
+app.post('/api/ai/chat', async (req, res) => {
+  try {
+    const { prompt } = req.body;
+    
+    if (!prompt) {
+      return res.status(400).json({ error: 'Prompt is required' });
+    }
+
+    console.log('🤖 Forwarding request to Hugging Face API...');
+    
+    const response = await fetch('https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.HUGGINGFACE_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        inputs: prompt,
+        parameters: {
+          max_new_tokens: 300,
+          temperature: 0.8,
+          top_p: 0.95,
+          return_full_text: false,
+          do_sample: true,
+          repetition_penalty: 1.2
+        }
+      })
+    });
+
+    console.log('Hugging Face API Response Status:', response.status);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Hugging Face API Error:', errorData);
+      return res.status(response.status).json(errorData);
+    }
+
+    const result = await response.json();
+    console.log('✅ AI Response received');
+    
+    res.json(result);
+  } catch (error) {
+    console.error('❌ Proxy Error:', error);
+    res.status(500).json({ 
+      error: 'Failed to get AI response',
+      details: error.message 
+    });
+  }
+});
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({
