@@ -4,9 +4,16 @@ const User = require('../models/User');
 
 // Generate JWT Token
 const generateToken = (userId) => {
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE || '7d'
-  });
+  try {
+    const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRE || '7d'
+    });
+    console.log('Token generated successfully for user:', userId);
+    return token;
+  } catch (error) {
+    console.error('JWT sign error:', error);
+    throw error;
+  }
 };
 
 // Register new user
