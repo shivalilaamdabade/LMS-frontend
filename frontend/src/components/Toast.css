@@ -1,0 +1,133 @@
+.toast {
+  position: fixed;
+  top: var(--space-6);
+  right: var(--space-6);
+  min-width: 320px;
+  max-width: 480px;
+  padding: var(--space-4) var(--space-5);
+  background: var(--bg-primary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  z-index: var(--z-toast);
+  animation: toast-slide-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-left: 4px solid;
+}
+
+.toast-exit {
+  animation: toast-slide-out 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Type Variants */
+.toast-success {
+  border-color: var(--success);
+}
+
+.toast-error {
+  border-color: var(--error);
+}
+
+.toast-warning {
+  border-color: var(--warning);
+}
+
+.toast-info {
+  border-color: var(--info);
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1;
+}
+
+.toast-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.toast-success .toast-icon {
+  color: var(--success);
+}
+
+.toast-error .toast-icon {
+  color: var(--error);
+}
+
+.toast-warning .toast-icon {
+  color: var(--warning);
+}
+
+.toast-info .toast-icon {
+  color: var(--info);
+}
+
+.toast-message {
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.toast-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-1);
+  color: var(--text-tertiary);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast-close:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.toast-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Animations */
+@keyframes toast-slide-in {
+  from {
+    transform: translateX(calc(100% + var(--space-6)));
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-slide-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(calc(100% + var(--space-6)));
+    opacity: 0;
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 640px) {
+  .toast {
+    top: auto;
+    bottom: var(--space-6);
+    left: var(--space-4);
+    right: var(--space-4);
+    min-width: unset;
+    max-width: none;
+  }
+}
