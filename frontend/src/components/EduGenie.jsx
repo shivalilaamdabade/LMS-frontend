@@ -11,7 +11,7 @@ const EduGenie = () => {
     {
       id: 1,
       type: 'bot',
-      text: "Hi! I'm EduGenie 🧞 Your AI course assistant. Ask me anything about your courses, learning strategies, assignments, or study tips! How can I help you today? 📚",
+      text: "Hi! I'm EduGenie 🧞 Your versatile AI assistant! Ask me anything - general knowledge, creative tasks, coding, math, writing, recommendations, or just chat! How can I help you today? ✨",
       timestamp: new Date()
     }
   ]);
@@ -24,31 +24,42 @@ const EduGenie = () => {
       // Build comprehensive conversation context (last 10 messages for better memory)
       const conversationHistory = messages
         .slice(-10)
-        .map(msg => `${msg.type === 'user' ? 'Student' : 'EduGenie'}: ${msg.text}`)
+        .map(msg => `${msg.type === 'user' ? 'User' : 'EduGenie'}: ${msg.text}`)
         .join('\n');
       
-      const prompt = `[INST] You are EduGenie, an AI learning assistant specialized in helping students with their courses. You have deep knowledge about:
+      const prompt = `[INST] You are EduGenie, a friendly, intelligent, and versatile AI assistant. You can help with ANYTHING:
 
-📚 COURSE-RELATED TOPICS:
-- Course content, lessons, and curriculum
-- Learning strategies and study techniques  
-- Course difficulty, prerequisites, and recommendations
-- Enrollment, progress tracking, and certificates
-- Assignment help and exam preparation
-- Technical issues with videos, quizzes, or materials
-- Time management and course completion
+🌟 YOU CAN HELP WITH:
+- General knowledge and facts
+- Creative writing and storytelling
+- Coding and technical questions
+- Math and science problems
+- Language translation and grammar
+- Recommendations (movies, books, courses, etc.)
+- Advice and life tips
+- Jokes and entertainment
+- Current events and news
+- Health and wellness (general info only)
+- Travel planning
+- Food and recipes
+- And much more!
 
-🎯 YOUR ROLE:
-- Answer ONLY course and education-related questions
-- Politely redirect non-course questions back to learning topics
-- Remember conversation context and refer to previous messages
-- Provide detailed, helpful explanations like a tutor
-- Use encouraging tone with occasional emojis
-- Break complex topics into simple steps
+🎯 YOUR PERSONALITY:
+- Be friendly, helpful, and conversational
+- Provide detailed, accurate information
+- Use clear explanations suitable for all ages
+- Add emojis occasionally to be engaging
+- Remember previous conversation context
+- If you don't know something, admit it honestly
+- Think step-by-step for complex problems
 
 ${conversationHistory}
-Student: ${userMessage}
+User: ${userMessage}
 EduGenie: [/INST]`;
+
+      console.log('Sending request to Hugging Face API...');
+      console.log('Token exists:', !!HF_API_TOKEN);
+      console.log('API URL:', HF_API_URL);
 
       const response = await fetch(HF_API_URL, {
         method: 'POST',
@@ -59,8 +70,8 @@ EduGenie: [/INST]`;
         body: JSON.stringify({
           inputs: prompt,
           parameters: {
-            max_new_tokens: 250,
-            temperature: 0.7,
+            max_new_tokens: 300,
+            temperature: 0.8,
             top_p: 0.95,
             return_full_text: false,
             do_sample: true,
@@ -69,8 +80,12 @@ EduGenie: [/INST]`;
         })
       });
 
+      console.log('Response status:', response.status);
+
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        console.error('API Error Details:', errorData);
+        throw new Error(`API error: ${response.status} - ${JSON.stringify(errorData)}`);
       }
 
       const result = await response.json();
@@ -83,7 +98,7 @@ EduGenie: [/INST]`;
       } else if (result.generated_text) {
         aiText = result.generated_text.trim();
       } else {
-        aiText = "I'm here to help with your courses! Ask me anything about your learning journey, course content, study tips, or progress.";
+        aiText = "I'm here to help! Feel free to ask me anything! 😊";
       }
 
       // Clean up any instruction tokens and system messages
@@ -93,8 +108,18 @@ EduGenie: [/INST]`;
       return aiText;
     } catch (error) {
       console.error('AI API Error:', error);
-      // Fallback to predefined responses
-      return getFallbackResponse(userMessage);
+      console.error('Error details:', error.message);
+      
+      // More detailed error message
+      if (error.message.includes('401')) {
+        return "⚠️ API Token Issue: The Hugging Face token is invalid or expired. Please check your environment variables.";
+      } else if (error.message.includes('429')) {
+        return "⏳ Rate Limit: I'm getting too many requests. Please wait a moment and try again.";
+      } else if (error.message.includes('503')) {
+        return "🔧 Service Unavailable: The AI model is loading or temporarily unavailable. Try again in a few seconds.";
+      } else {
+        return `⚠️ Connection Issue: ${error.message}. Please check your internet connection and try again.`;
+      }
     }
   };
 
@@ -256,7 +281,7 @@ EduGenie: [/INST]`;
               <span className="edugenie-icon">🧞</span>
               <span className="edugenie-name">EduGenie</span>
             </div>
-            <p className="edugenie-subtitle">Your AI Course Assistant</p>
+            <p className="edugenie-subtitle">Your Versatile AI Assistant</p>
             <button className="clear-chat-btn" onClick={clearChat} title="Start new conversation">
               🗑️ New Chat
             </button>
