@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import './EduGenie.css';
 
 // API Configuration - Use backend proxy to avoid CORS
-const HF_API_URL = '/api/ai/chat';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const HF_CHAT_ENDPOINT = `${API_BASE_URL}/ai/chat`;
 
 const EduGenie = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -57,8 +58,9 @@ User: ${userMessage}
 EduGenie: [/INST]`;
 
       console.log('Sending request to backend AI proxy...');
+      console.log('Endpoint:', HF_CHAT_ENDPOINT);
 
-      const response = await fetch(HF_API_URL, {
+      const response = await fetch(HF_CHAT_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
