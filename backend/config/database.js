@@ -7,7 +7,7 @@ console.log('DB_PORT:', process.env.DB_PORT ? 'SET' : 'MISSING');
 console.log('DB_USER:', process.env.DB_USER ? 'SET' : 'MISSING');
 console.log('DB_PASSWORD:', process.env.DB_PASSWORD ? 'SET' : 'MISSING');
 console.log('DB_NAME:', process.env.DB_NAME ? 'SET' : 'MISSING');
-console.log('SSL Config:', 'false');
+console.log('SSL Config:', 'Aiven requires SSL - enabling with rejectUnauthorized');
 console.log('==============================');
 
 // Create MySQL connection pool
@@ -20,7 +20,9 @@ try {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    ssl: false, // Disabled for Aiven compatibility
+    ssl: {
+      rejectUnauthorized: false // Required for Aiven cloud MySQL
+    },
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
