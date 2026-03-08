@@ -1,21 +1,94 @@
 import { useState, useEffect } from 'react';
 import './EduGenie.css';
 
+// Hugging Face API Configuration
+const HF_API_TOKEN = import.meta.env.VITE_HUGGINGFACE_TOKEN;
+const HF_API_URL = 'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2';
+
 const EduGenie = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       id: 1,
       type: 'bot',
-      text: "Hi! I'm EduGenie, your learning assistant. How can I help you today? 🎓",
+      text: "Hi! I'm EduGenie, your AI learning assistant powered by advanced AI. How can I help you today? 🎓",
       timestamp: new Date()
     }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
 
-  // Predefined responses for common questions
-  const getBotResponse = (userMessage) => {
+  // Get AI response from Hugging Face
+  const getAIResponse = async (userMessage) => {
+    try {
+      // Build conversation context
+      const conversationHistory = messages
+        .slice(-6) // Last 3 exchanges for context
+        .map(msg => `${msg.type === 'user' ? 'Student' : 'EduGenie'}: ${msg.text}`)
+        .join('\n');
+      
+      const prompt = `[INST] You are EduGenie, a friendly and knowledgeable AI learning assistant for an LMS platform. Help students with:
+- Course recommendations and information
+- Learning tips and study strategies
+- Platform navigation (dashboard, courses, enrollment)
+- Progress tracking and certificates
+- Technical support
+- Motivation and encouragement
+
+Be concise, helpful, and encouraging. Use emojis occasionally.
+
+${conversationHistory}
+Student: ${userMessage}
+EduGenie: [/INST]`;
+
+      const response = await fetch(HF_API_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${HF_API_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          inputs: prompt,
+          parameters: {
+            max_new_tokens: 150,
+            temperature: 0.7,
+            top_p: 0.95,
+            return_full_text: false,
+            do_sample: true
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('AI Response:', result);
+      
+      // Extract generated text
+      let aiText = '';
+      if (Array.isArray(result) && result[0]?.generated_text) {
+        aiText = result[0].generated_text.trim();
+      } else if (result.generated_text) {
+        aiText = result.generated_text.trim();
+      } else {
+        aiText = "I'm here to help with your learning journey! Feel free to ask me anything about courses, progress, or study tips.";
+      }
+
+      // Clean up any instruction tokens
+      aiText = aiText.replace(/\[\/INST\]/g, '').trim();
+      
+      return aiText;
+    } catch (error) {
+      console.error('AI API Error:', error);
+      // Fallback to predefined responses
+      return getFallbackResponse(userMessage);
+    }
+  };
+
+  // Fallback responses when AI fails
+  const getFallbackResponse = (userMessage) => {
     const message = userMessage.toLowerCase();
     
     // Course-related queries
@@ -89,8 +162,8 @@ const EduGenie = () => {
       return "I'm EduGenie, your AI learning assistant! I'm here to help you navigate the platform, find courses, and make your learning journey smoother.";
     }
     
-    // Default response
-    return "That's an interesting question! For specific inquiries, I recommend checking the course details or exploring the Dashboard. Is there anything else I can help you with?";
+    // Default fallback
+    return "That's interesting! I'm here to help with your learning journey. Ask me about courses, study tips, progress tracking, or anything related to your education!";
   };
 
   const handleSendMessage = async () => {
@@ -107,18 +180,31 @@ const EduGenie = () => {
     setInputValue('');
     setIsTyping(true);
 
-    // Simulate bot typing delay
-    setTimeout(() => {
+    try {
+      // Get AI response from Hugging Face
+      const aiResponseText = await getAIResponse(inputValue);
+      
       const botResponse = {
         id: messages.length + 2,
         type: 'bot',
-        text: getBotResponse(inputValue),
+        text: aiResponseText,
         timestamp: new Date()
       };
       
       setMessages(prev => [...prev, botResponse]);
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      // Show error message
+      const botResponse = {
+        id: messages.length + 2,
+        type: 'bot',
+        text: "I'm having trouble connecting right now, but I'm here to help! Please try again in a moment.",
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, botResponse]);
+    } finally {
       setIsTyping(false);
-    }, 800);
+    }
   };
 
   const handleKeyPress = (e) => {
