@@ -11,17 +11,25 @@ console.log('SSL Config:', 'false');
 console.log('==============================');
 
 // Create MySQL connection pool
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT),
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  ssl: false, // Disabled for Aiven compatibility
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
+let pool;
+
+try {
+  pool = mysql.createPool({
+    host: process.env.DB_HOST,
+    port: parseInt(process.env.DB_PORT),
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    ssl: false, // Disabled for Aiven compatibility
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+  });
+  console.log('✓ Database pool created successfully');
+} catch (error) {
+  console.error('✗ Failed to create database pool:', error.message);
+  throw error;
+}
 
 // Test connection
 async function testConnection() {
