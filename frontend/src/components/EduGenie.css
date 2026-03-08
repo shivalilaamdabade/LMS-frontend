@@ -85,7 +85,28 @@
 .edugenie-subtitle {
   font-size: 13px;
   opacity: 0.9;
-  margin: 0;
+  margin: 5px 0 0 0;
+}
+
+.clear-chat-btn {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.clear-chat-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.02);
 }
 
 /* Messages Area */

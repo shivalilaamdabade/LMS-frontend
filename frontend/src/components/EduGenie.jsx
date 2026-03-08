@@ -11,7 +11,7 @@ const EduGenie = () => {
     {
       id: 1,
       type: 'bot',
-      text: "Hi! I'm EduGenie, your AI learning assistant powered by advanced AI. How can I help you today? 🎓",
+      text: "Hi! I'm EduGenie 🧞 Your AI course assistant. Ask me anything about your courses, learning strategies, assignments, or study tips! How can I help you today? 📚",
       timestamp: new Date()
     }
   ]);
@@ -21,21 +21,30 @@ const EduGenie = () => {
   // Get AI response from Hugging Face
   const getAIResponse = async (userMessage) => {
     try {
-      // Build conversation context
+      // Build comprehensive conversation context (last 10 messages for better memory)
       const conversationHistory = messages
-        .slice(-6) // Last 3 exchanges for context
+        .slice(-10)
         .map(msg => `${msg.type === 'user' ? 'Student' : 'EduGenie'}: ${msg.text}`)
         .join('\n');
       
-      const prompt = `[INST] You are EduGenie, a friendly and knowledgeable AI learning assistant for an LMS platform. Help students with:
-- Course recommendations and information
-- Learning tips and study strategies
-- Platform navigation (dashboard, courses, enrollment)
-- Progress tracking and certificates
-- Technical support
-- Motivation and encouragement
+      const prompt = `[INST] You are EduGenie, an AI learning assistant specialized in helping students with their courses. You have deep knowledge about:
 
-Be concise, helpful, and encouraging. Use emojis occasionally.
+📚 COURSE-RELATED TOPICS:
+- Course content, lessons, and curriculum
+- Learning strategies and study techniques  
+- Course difficulty, prerequisites, and recommendations
+- Enrollment, progress tracking, and certificates
+- Assignment help and exam preparation
+- Technical issues with videos, quizzes, or materials
+- Time management and course completion
+
+🎯 YOUR ROLE:
+- Answer ONLY course and education-related questions
+- Politely redirect non-course questions back to learning topics
+- Remember conversation context and refer to previous messages
+- Provide detailed, helpful explanations like a tutor
+- Use encouraging tone with occasional emojis
+- Break complex topics into simple steps
 
 ${conversationHistory}
 Student: ${userMessage}
@@ -50,11 +59,12 @@ EduGenie: [/INST]`;
         body: JSON.stringify({
           inputs: prompt,
           parameters: {
-            max_new_tokens: 150,
+            max_new_tokens: 250,
             temperature: 0.7,
             top_p: 0.95,
             return_full_text: false,
-            do_sample: true
+            do_sample: true,
+            repetition_penalty: 1.2
           }
         })
       });
@@ -73,11 +83,12 @@ EduGenie: [/INST]`;
       } else if (result.generated_text) {
         aiText = result.generated_text.trim();
       } else {
-        aiText = "I'm here to help with your learning journey! Feel free to ask me anything about courses, progress, or study tips.";
+        aiText = "I'm here to help with your courses! Ask me anything about your learning journey, course content, study tips, or progress.";
       }
 
-      // Clean up any instruction tokens
+      // Clean up any instruction tokens and system messages
       aiText = aiText.replace(/\[\/INST\]/g, '').trim();
+      aiText = aiText.replace(/\[INST\][\s\S]*?\[\/INST\]/g, '').trim();
       
       return aiText;
     } catch (error) {
@@ -218,6 +229,17 @@ EduGenie: [/INST]`;
     setIsOpen(!isOpen);
   };
 
+  const clearChat = () => {
+    setMessages([
+      {
+        id: 1,
+        type: 'bot',
+        text: "Hi! I'm EduGenie 🧞 Your AI course assistant. Ask me anything about your courses, learning strategies, assignments, or study tips! How can I help you today? 📚",
+        timestamp: new Date()
+      }
+    ]);
+  };
+
   return (
     <>
       {/* Chat Toggle Button */}
@@ -234,7 +256,10 @@ EduGenie: [/INST]`;
               <span className="edugenie-icon">🧞</span>
               <span className="edugenie-name">EduGenie</span>
             </div>
-            <p className="edugenie-subtitle">Your Learning Assistant</p>
+            <p className="edugenie-subtitle">Your AI Course Assistant</p>
+            <button className="clear-chat-btn" onClick={clearChat} title="Start new conversation">
+              🗑️ New Chat
+            </button>
           </div>
 
           {/* Chat Messages */}
