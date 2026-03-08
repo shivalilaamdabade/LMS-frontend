@@ -23,6 +23,9 @@ try {
     ssl: {
       rejectUnauthorized: false // Required for Aiven cloud MySQL
     },
+    connectTimeout: 30000,  // 30 seconds - for slow free-tier connections
+    acquireTimeout: 30000,  // 30 seconds
+    timeout: 30000,         // 30 seconds
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
