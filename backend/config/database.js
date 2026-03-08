@@ -36,14 +36,18 @@ try {
 // Test connection
 async function testConnection() {
   try {
+    console.log('Attempting database connection...');
     const connection = await pool.getConnection();
     console.log('✓ Database connected successfully!');
+    console.log('Connection thread ID:', connection.threadId);
     connection.release();
     return true;
   } catch (error) {
     console.error('✗ Database connection failed:', error.message);
     console.error('Error code:', error.code);
     console.error('Error errno:', error.errno);
+    console.error('SQL State:', error.sqlState);
+    console.error('SSL error details:', error.message.includes('SSL') ? 'SSL-related error detected' : 'Non-SSL error');
     return false;
   }
 }
