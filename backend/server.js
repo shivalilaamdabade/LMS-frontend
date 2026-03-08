@@ -31,7 +31,9 @@ app.get('/', (req, res) => {
   res.json({
     success: true,
     message: 'LMS API is running',
-    version: '1.0.0'
+    version: '1.0.0',
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV || 'unknown'
   });
 });
 
@@ -47,6 +49,26 @@ app.get('/api', (req, res) => {
       courses: '/api/courses'
     }
   });
+});
+
+// Database health check route
+app.get('/api/health/db', async (req, res) => {
+  try {
+    const { testConnection } = require('./config/database');
+    const connected = await testConnection();
+    
+    res.json({
+      success: connected,
+      database: connected ? 'Connected' : 'Disconnected',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // API Routes
